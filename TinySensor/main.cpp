@@ -35,6 +35,7 @@ uint16_t battery_voltage_mv = 0;
 struct SETTINGS {
     uint16_t magic;
     uint16_t bandgap;
+    uint8_t power;
     char id[6];
 } settings;
 
@@ -113,7 +114,7 @@ void nrfSetup() {
     static const uint8_t GATEWAY_CHANNEL = 0x6f;
 
     radio.begin();
-    radio.setPALevel(RF24_PA_LOW);
+    radio.setPALevel(settings.power);
     radio.enableDynamicPayloads();
     radio.setDataRate(RF24_1MBPS);
     radio.setCRCLength(RF24_CRC_16);
@@ -229,6 +230,7 @@ void initAll() {
     if (settings.magic != MAGIC) { // load defaults
         settings.magic = MAGIC;
         settings.bandgap = REFERENCE_VOLTAGE;
+        settings.power = RF24_PA_MAX;
         generateUID(settings.id);
         eeprom_write_block(&settings, 0, sizeof(settings));
     }
