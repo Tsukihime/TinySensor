@@ -82,12 +82,12 @@ void enterSleep(void) {
 uint16_t getBatteryVoltage() {
     #define ADC_REF_AVCC 0x00
     #define ADC_BANDGAP_MUX ((1 << MUX5) | (1 << MUX0))
-    #define ADC_PRESCALER_DIV32 ((1 << ADPS2) | (1 << ADPS0))
+    #define ADC_PRESCALER_DIV8 ((1 << ADPS1) | (1 << ADPS0))
 
     power_adc_enable();
 
     ADMUX = ADC_REF_AVCC | ADC_BANDGAP_MUX;
-    ADCSRA = (1 << ADEN) | ADC_PRESCALER_DIV32;
+    ADCSRA = (1 << ADEN) | ADC_PRESCALER_DIV8;
 
     _delay_us(500);  // a delay is needed to give a stable reading!
 
