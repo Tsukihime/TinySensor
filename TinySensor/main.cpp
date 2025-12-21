@@ -116,7 +116,7 @@ void nrfSetup() {
     radio.begin();
     radio.setPALevel(settings.power);
     radio.enableDynamicPayloads();
-    radio.setDataRate(RF24_1MBPS);
+    radio.setDataRate(RF24_250KBPS);
     radio.setCRCLength(RF24_CRC_16);
     radio.setChannel(GATEWAY_CHANNEL);
     radio.setAutoAck(true);
