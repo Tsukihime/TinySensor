@@ -14,7 +14,7 @@
 
 #include "bmp280/bmp280.h"
 #include "rf24/RF24.h"
-#include "rf24/RF24MQTTGateway.h"
+#include "lib/MQTTGateway.hpp"
 
 #define MOSI_p PINA5
 #define MISO_p PINA6
@@ -28,7 +28,9 @@ uint8_t usiSpiTransfer(uint8_t data);
 void nrfCsnCeControl(bool CSN, bool CE);
 
 RF24 radio(usiSpiTransfer, nrfCsnCeControl);
-RF24MQTTGateway mqtt(radio);
+MQTTGatewayTransmitter<32> mqtt([](const void* data, size_t size) -> bool {
+    return radio.write(const_cast<void*>(data), size, false);
+});
 
 uint16_t battery_voltage_mv = 0;
 
@@ -141,7 +143,7 @@ uint8_t renderTemplate(const char* _template, uint16_t index) {
 }
 
 bool identify() {
-    return mqtt.sendToRadio(id_topic, sizeof(id_topic) - 1, id_payload, sizeof(id_payload) - 1, true, true, renderTemplate);
+    return mqtt.send(id_topic, sizeof(id_topic) - 1, id_payload, sizeof(id_payload) - 1, true, true, renderTemplate);
 }
 
 void measure() {
@@ -260,6 +262,7 @@ int main(void) {
     while (true) {
         if (ident_counter == 0 || update_counter == 0) {
             power_usi_enable();
+            radio.powerUp();
             nrfSetup();
             if (ident_counter == 0) {
                 ident_counter = IDENT_PERIOD;
@@ -270,6 +273,7 @@ int main(void) {
                 update_counter = UPDATE_PERIOD;
                 measure();
             }
+            radio.powerDown();
             power_usi_disable();
         }
 
