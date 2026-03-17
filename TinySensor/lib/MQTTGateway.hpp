@@ -99,7 +99,7 @@ using MessageCallback = void (*)(const char *topic,
                                  uint8_t *payload,
                                  uint16_t payload_length,
                                  bool retained);
-                                 
+
 template <size_t PacketSize = 32>
 class Transmitter {
 private:
@@ -110,7 +110,7 @@ public:
 
     bool send(const char *topic, uint8_t topic_len,
               const char *payload, uint16_t payload_len, bool retained,
-              bool use_callback, GetDataCallback getdata) {
+              GetDataCallback getdata = nullptr) {
         Packet<PacketSize> packet;
         uint16_t total_size = topic_len + payload_len;
         uint16_t sent = 0;
@@ -141,10 +141,10 @@ public:
             for (uint16_t i = 0; i < bytes_to_copy; i++) {
                 uint16_t offset = sent + i;
                 if (offset < topic_len) {
-                    data[i] = use_callback ? getdata(topic, offset) : topic[offset];
+                    data[i] = getdata ? getdata(topic, offset) : topic[offset];
                 } else {
                     offset -= topic_len;
-                    data[i] = use_callback ? getdata(payload, offset) : payload[offset];
+                    data[i] = getdata ? getdata(payload, offset) : payload[offset];
                 }
             }
 
@@ -160,15 +160,12 @@ public:
 
     bool publish(const char *topic, const char *payload, bool retained = false) {
         return send(topic, static_cast<uint8_t>(strlen(topic)),
-                    payload, static_cast<uint16_t>(strlen(payload)),
-                    retained, false, nullptr);
+                    payload, static_cast<uint16_t>(strlen(payload)), retained);
     }
 
     bool publish_P(const char *topic, const char *payload_P, bool retained = false) {
         return send(topic, static_cast<uint8_t>(strlen_P(topic)),
-                    payload_P, static_cast<uint16_t>(strlen_P(payload_P)),
-                    retained,
-                    true,
+                    payload_P, static_cast<uint16_t>(strlen_P(payload_P)), retained,
                     [](const char *ptr, uintptr_t index) -> uint8_t {
                         return pgm_read_byte(ptr + index);
                     });

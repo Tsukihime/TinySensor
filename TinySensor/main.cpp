@@ -143,7 +143,7 @@ uint8_t renderTemplate(const char* _template, uint16_t index) {
 }
 
 bool identify() {
-    return mqtt.send(id_topic, sizeof(id_topic) - 1, id_payload, sizeof(id_payload) - 1, true, true, renderTemplate);
+    return mqtt.send(id_topic, sizeof(id_topic) - 1, id_payload, sizeof(id_payload) - 1, true, renderTemplate);
 }
 
 void measure() {
